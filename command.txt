@@ -1,0 +1,1 @@
+python myrender.py -m ..\data\bathroom_wall_res\30000\ --skip_test
