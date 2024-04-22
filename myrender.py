@@ -48,14 +48,14 @@ def render_set(model_path, name, iteration, views, gaussians, pipeline, backgrou
         result = render(view, gaussians, pipeline, background)
         rendering = result["render"]
 
-        depth_tmpinfo = result["depth_tmpinfo"]
-        depth = depth_tmpinfo[0, :, :].unsqueeze(0).repeat(3, 1, 1)
-        #sum_alpha = depth_tmpinfo[1, :, :].unsqueeze(0).repeat(3, 1, 1)
-        #cnt_gs = depth_tmpinfo[2, :, :].unsqueeze(0).repeat(3, 1, 1)
-        #myeval = depth_tmpinfo[1, :, :].unsqueeze(0).repeat(3, 1, 1)
+        tmpinfo = result["tmpinfo"]
+        depth = tmpinfo[0, :, :].unsqueeze(0).repeat(3, 1, 1)
+        #sum_alpha = tmpinfo[1, :, :].unsqueeze(0).repeat(3, 1, 1)
+        #cnt_gs = tmpinfo[2, :, :].unsqueeze(0).repeat(3, 1, 1)
+        #myeval = tmpinfo[1, :, :].unsqueeze(0).repeat(3, 1, 1)
 
-        v1 = depth_tmpinfo[1, :, :].unsqueeze(0).repeat(3, 1, 1)
-        v2 = depth_tmpinfo[2, :, :].unsqueeze(0).repeat(3, 1, 1)
+        v1 = tmpinfo[1, :, :].unsqueeze(0).repeat(3, 1, 1)
+        v2 = tmpinfo[2, :, :].unsqueeze(0).repeat(3, 1, 1)
         
         
         if mode == "cut":
