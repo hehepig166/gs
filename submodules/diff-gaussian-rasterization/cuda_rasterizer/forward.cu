@@ -509,6 +509,8 @@ renderCUDA(
 		//out_depth_tmpinfo[2 * H * W + pix_id] = cnt_gs;
 
 		// contri value
+		const float con_inf = 1e10;
+		if (sum_contrivalue > con_inf) sum_contrivalue = con_inf;
 		out_depth_tmpinfo[1 * H * W + pix_id] = sum_contrivalue;
 
 		
