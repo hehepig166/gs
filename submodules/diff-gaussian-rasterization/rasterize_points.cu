@@ -162,7 +162,7 @@ std::tuple<torch::Tensor, torch::Tensor, torch::Tensor, torch::Tensor, torch::Te
   torch::Tensor dL_drotations = torch::zeros({P, 4}, means3D.options());
 
   // 2024-04-28 zzk
-  torch::Tensor dL_dconic33s = torch::zeros({P, 1}, means3D.options());
+  torch::Tensor dL_dconic33s = torch::zeros({P+100, 1}, means3D.options());
   
   if(P != 0)
   {  

@@ -596,8 +596,10 @@ __global__ void computeCov2DCUDA_2(int P,
 	float3 dL_dconic = { dL_dconics[4 * idx], dL_dconics[4 * idx + 1] * 2, dL_dconics[4 * idx + 3] };
 	float3 t = transformPoint4x3(mean, view_matrix);
 
+
 	// dL_dconic33
 	float dL_dconic33 = dL_dconic33s[idx];
+
 	
 	const float limx = 1.3f * tan_fovx;
 	const float limy = 1.3f * tan_fovy;
@@ -610,6 +612,9 @@ __global__ void computeCov2DCUDA_2(int P,
 	const float y_grad_mul = tytz < -limy || tytz > limy ? 0 : 1;
 
 	const float pl = sqrt(t.x * t.x + t.y * t.y + t.z * t.z);
+	if (abs(pl) < 0.001) {
+		printf("%.05f\n", pl);
+	}
 	glm::mat3 J = glm::mat3(h_x / t.z, 0.0f, -(h_x * t.x) / (t.z * t.z),
 		0.0f, h_y / t.z, -(h_y * t.y) / (t.z * t.z),
 		// 0, 0, 0);
@@ -630,12 +635,12 @@ __global__ void computeCov2DCUDA_2(int P,
 	glm::mat3 cov = glm::transpose(T) * glm::transpose(Vrk) * T;
 
 	// Use helper variables for 2D covariance entries. More compact.
-	float a = cov[0][0] += 0.3f;
+	float a = (cov[0][0] += 0.3f);
 	float b = cov[0][1];
 	float c = cov[0][2];
-	float d = cov[1][1] += 0.3f;
+	float d = (cov[1][1] += 0.3f);
 	float e = cov[1][2];
-	float f = cov[2][2] += 0.01f;
+	float f = (cov[2][2] += 0.01f);
 
 	float denom = -c * c * d + 2 * b * c * e - a * e * e - b * b * f + a * d * f;
 	float dL_da = 0, dL_db = 0, dL_dc = 0, dL_dd = 0, dL_de = 0, dL_df = 0;
@@ -869,11 +874,12 @@ renderCUDA_2(
 
 			// 2024-04-24 zzk
 			// calc and updat gradients w.r.t. conic33 (for thickness)
-			const float conic33 = conic33s[j] + 0.0000001f;
+			const float conic33 = collected_conic33s[j] + 0.0000001f;	// use collected_conic33s! not conic33s, or you will encounter illegal memory access.
+			//const float conic33 = 1;
 			const float thickness = sqrt(1.0f/conic33);
 			const float dL_dt = alpha;
 			const float dt_dconic33 = - 0.5f / conic33 * thickness;
-			atomicAdd(&(dL_dconic33[global_id]), dL_dt * dt_dconic33);
+			// atomicAdd(&(dL_dconic33[global_id]), dL_dt * dt_dconic33);	// ????? 2024-04-28
 			// 2024-04-28
 			// modify dL_dalpha
 			// L = Sum[alpha * thickness]
@@ -967,7 +973,7 @@ void BACKWARD::preprocess(
 		P, D, M,
 		(float3*)means3D,
 		radii,
-		shs,
+		(grad_flag == 0 ? shs : NULL),
 		clamped,
 		(glm::vec3*)scales,
 		(glm::vec4*)rotations,

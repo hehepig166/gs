@@ -379,6 +379,7 @@ void CudaRasterizer::Rasterizer::backward(
 	int grad_flag,
 	float* dL_dconic33)
 {
+	//printf("start backward, grad_flag = %d..\n", grad_flag);
 	GeometryState geomState = GeometryState::fromChunk(geom_buffer, P);
 	BinningState binningState = BinningState::fromChunk(binning_buffer, R);
 	ImageState imgState = ImageState::fromChunk(img_buffer, width * height);
@@ -447,4 +448,5 @@ void CudaRasterizer::Rasterizer::backward(
 		(glm::vec4*)dL_drot,
 		grad_flag,
 		dL_dconic33), debug)	// 2024-04-28 zzk
+	//printf("..\n");
 }

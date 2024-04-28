@@ -84,7 +84,7 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
         # choose loss mode
         grad_flag = 0
         lambda_thickness = 0
-        if (iteration % 3000 > 1000):
+        if (iteration % 300 > 50):
             grad_flag = 1
             lambda_thickness = opt.lambda_thickness
 
