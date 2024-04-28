@@ -598,7 +598,10 @@ __global__ void computeCov2DCUDA_2(int P,
 
 
 	// dL_dconic33
-	float dL_dconic33 = dL_dconic33s[idx];
+	// float dL_dconic33 = dL_dconic33s[idx];			// failed
+	float dL_dconic33 = dL_dconics[4 * idx + 2];		// failed
+	// float dL_dconic33 = 1;
+	if (idx %10 == 0) printf("%f\n", dL_dconic33);
 
 	
 	const float limx = 1.3f * tan_fovx;
@@ -874,16 +877,20 @@ renderCUDA_2(
 
 			// 2024-04-24 zzk
 			// calc and updat gradients w.r.t. conic33 (for thickness)
-			const float conic33 = collected_conic33s[j] + 0.0000001f;	// use collected_conic33s! not conic33s, or you will encounter illegal memory access.
-			//const float conic33 = 1;
-			const float thickness = sqrt(1.0f/conic33);
-			const float dL_dt = alpha;
-			const float dt_dconic33 = - 0.5f / conic33 * thickness;
-			// atomicAdd(&(dL_dconic33[global_id]), dL_dt * dt_dconic33);	// ????? 2024-04-28
-			// 2024-04-28
-			// modify dL_dalpha
-			// L = Sum[alpha * thickness]
-			dL_dalpha += thickness;
+			const float conic33 = collected_conic33s[j];	// use collected_conic33s! not conic33s, or you will encounter illegal memory access.
+			if (abs(conic33) > 0.0001) {
+				// const float conic33 = 1;
+				const float thickness = sqrt(1.0f/conic33);
+				const float dL_dt = alpha;
+				const float dt_dconic33 = - 0.5f / conic33 * thickness;
+				// atomicAdd(&(dL_dconic33[global_id]), dL_dt * dt_dconic33);	// ????? 2024-04-28
+				atomicAdd(&dL_dconic2D[global_id].z, dL_dt * dt_dconic33);
+				// if (global_id < 0 || global_id > 8000) printf("%d\n", global_id);
+				// 2024-04-28
+				// modify dL_dalpha
+				// L = Sum[alpha * thickness]
+				dL_dalpha += thickness;
+			}
 
 			// Update gradients w.r.t. 2D covariance (2x2 matrix, symmetric)
 			atomicAdd(&dL_dconic2D[global_id].x, -0.5f * gdx * d.x * dL_dG);
