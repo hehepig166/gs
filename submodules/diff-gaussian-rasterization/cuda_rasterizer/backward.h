@@ -36,7 +36,9 @@ namespace BACKWARD
 		float4* dL_dconic2D,
 		float* dL_dopacity,
 		float* dL_dcolors,
-		int grad_flag);
+		int grad_flag,
+		const float* conic33s,
+		float* dL_dconic33);
 
 	void preprocess(
 		int P, int D, int M,
@@ -61,7 +63,8 @@ namespace BACKWARD
 		float* dL_dsh,
 		glm::vec3* dL_dscale,
 		glm::vec4* dL_drot,
-		int grad_flag);
+		int grad_flag,
+		float* dL_dconic33);
 }
 
 #endif

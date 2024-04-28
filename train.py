@@ -81,23 +81,28 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
         if (iteration - 1) == debug_from:
             pipe.debug = True
 
-        bg = torch.rand((3), device="cuda") if opt.random_background else background
+        # choose loss mode
+        grad_flag = 0
+        lambda_thickness = 0
+        if (iteration % 1500 > 1200):
+            grad_flag = 1
+            lambda_thickness = opt.lambda_thickness
 
-        render_pkg = render(viewpoint_cam, gaussians, pipe, bg)
+        bg = torch.rand((3), device="cuda") if opt.random_background else background
+        
+        render_pkg = render(viewpoint_cam, gaussians, pipe, bg, grad_flag = grad_flag)
         image, viewspace_point_tensor, visibility_filter, radii = render_pkg["render"], render_pkg["viewspace_points"], render_pkg["visibility_filter"], render_pkg["radii"]
 
         thickness = render_pkg["tmpinfo"][1, :, :]
         Lthickness = torch.mean(thickness)
-        if iteration < 2000:
-            Lthickness = 0
 
         # Loss
         gt_image = viewpoint_cam.original_image.cuda()
         Ll1 = l1_loss(image, gt_image)
         loss = (
-            (1.0 - opt.lambda_dssim - opt.lambda_thickness)* Ll1
+            (1.0 - opt.lambda_dssim - lambda_thickness)* Ll1
             + opt.lambda_dssim * (1.0 - ssim(image, gt_image))
-            + opt.lambda_thickness * (Lthickness)
+            + lambda_thickness * (Lthickness)
         )
         loss.backward()
 
@@ -107,7 +112,7 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
             # Progress bar
             ema_loss_for_log = 0.4 * loss.item() + 0.6 * ema_loss_for_log
             if iteration % 10 == 0:
-                progress_bar.set_postfix({"Loss": f"{ema_loss_for_log:.{7}f}"})
+                progress_bar.set_postfix({"Loss": f"{ema_loss_for_log:.{7}f}", "grad_flag": grad_flag})
                 progress_bar.update(10)
             if iteration == opt.iterations:
                 progress_bar.close()

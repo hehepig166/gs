@@ -846,7 +846,7 @@ renderCUDA_2(
 				// Update the gradients w.r.t. color of the Gaussian. 
 				// Atomic, since this pixel is just one of potentially
 				// many that were affected by this Gaussian.
-				atomicAdd(&(dL_dcolors[global_id * C + ch]), dchannel_dcolor * dL_dchannel);
+				// atomicAdd(&(dL_dcolors[global_id * C + ch]), dchannel_dcolor * dL_dchannel);
 			}
 			//dL_dalpha *= T;
 			// Update last alpha (to be used in the next iteration)
@@ -879,17 +879,13 @@ renderCUDA_2(
 			// L = Sum[alpha * thickness]
 			dL_dalpha += thickness;
 
-			// Update gradients w.r.t. 2D mean position of the Gaussian
-			atomicAdd(&dL_dmean2D[global_id].x, dL_dG * dG_ddelx * ddelx_dx);
-			atomicAdd(&dL_dmean2D[global_id].y, dL_dG * dG_ddely * ddely_dy);
-
 			// Update gradients w.r.t. 2D covariance (2x2 matrix, symmetric)
 			atomicAdd(&dL_dconic2D[global_id].x, -0.5f * gdx * d.x * dL_dG);
 			atomicAdd(&dL_dconic2D[global_id].y, -0.5f * gdx * d.y * dL_dG);
 			atomicAdd(&dL_dconic2D[global_id].w, -0.5f * gdy * d.y * dL_dG);
 
 			// Update gradients w.r.t. opacity of the Gaussian
-			atomicAdd(&(dL_dopacity[global_id]), G * dL_dalpha);
+			// atomicAdd(&(dL_dopacity[global_id]), G * dL_dalpha);
 		}
 	}
 }
@@ -923,25 +919,46 @@ void BACKWARD::preprocess(
 	float* dL_dsh,
 	glm::vec3* dL_dscale,
 	glm::vec4* dL_drot,
-	int grad_flag)
+	int grad_flag,
+	float* dL_dconic33)
 {
 	// Propagate gradients for the path of 2D conic matrix computation. 
 	// Somewhat long, thus it is its own kernel rather than being part of 
 	// "preprocess". When done, loss gradient w.r.t. 3D means has been
 	// modified and gradient w.r.t. 3D covariance matrix has been computed.	
-	computeCov2DCUDA << <(P + 255) / 256, 256 >> > (
-		P,
-		means3D,
-		radii,
-		cov3Ds,
-		focal_x,
-		focal_y,
-		tan_fovx,
-		tan_fovy,
-		viewmatrix,
-		dL_dconic,
-		(float3*)dL_dmean3D,
-		dL_dcov3D);
+	if (true || grad_flag == 0) {	// 2024-04-28 zzk
+		computeCov2DCUDA << <(P + 255) / 256, 256 >> > (
+			P,
+			means3D,
+			radii,
+			cov3Ds,
+			focal_x,
+			focal_y,
+			tan_fovx,
+			tan_fovy,
+			viewmatrix,
+			dL_dconic,
+			(float3*)dL_dmean3D,
+			dL_dcov3D
+			);
+	}
+	else {
+		computeCov2DCUDA_2 << <(P + 255) / 256, 256 >> > (
+			P,
+			means3D,
+			radii,
+			cov3Ds,
+			focal_x,
+			focal_y,
+			tan_fovx,
+			tan_fovy,
+			viewmatrix,
+			dL_dconic,
+			dL_dconic33,
+			(float3*)dL_dmean3D,
+			dL_dcov3D
+			);
+	}
 
 	// Propagate gradients for remaining steps: finish 3D mean gradients,
 	// propagate color gradients to SH (if desireD), propagate 3D covariance
@@ -982,22 +999,48 @@ void BACKWARD::render(
 	float4* dL_dconic2D,
 	float* dL_dopacity,
 	float* dL_dcolors,
-	int grad_flag)
+	int grad_flag,
+	const float* conic33,		// 2024-04-28 zzk
+	float* dL_dconic33)		// 2024-04-28 zzk
 {
-	renderCUDA<NUM_CHANNELS> << <grid, block >> >(
-		ranges,
-		point_list,
-		W, H,
-		bg_color,
-		means2D,
-		conic_opacity,
-		colors,
-		final_Ts,
-		n_contrib,
-		dL_dpixels,
-		dL_dmean2D,
-		dL_dconic2D,
-		dL_dopacity,
-		dL_dcolors
-		);
+	// printf("render, grad_flag = %d\n", grad_flag);
+	if (grad_flag == 0) {	// default
+		renderCUDA<NUM_CHANNELS> << <grid, block >> >(
+			ranges,
+			point_list,
+			W, H,
+			bg_color,
+			means2D,
+			conic_opacity,
+			colors,
+			final_Ts,
+			n_contrib,
+			dL_dpixels,
+			dL_dmean2D,
+			dL_dconic2D,
+			dL_dopacity,
+			dL_dcolors
+			);
+	}
+	else {
+		// printf(".....\n");
+		renderCUDA_2<NUM_CHANNELS> << <grid, block >> >(
+			ranges,
+			point_list,
+			W, H,
+			bg_color,
+			means2D,
+			conic_opacity,
+			conic33,		// 2024-04-28 zzk
+			colors,
+			final_Ts,
+			n_contrib,
+			dL_dpixels,
+			dL_dmean2D,
+			dL_dconic2D,
+			dL_dopacity,
+			dL_dcolors,
+			dL_dconic33		// 2024-04-28 zzk
+			);
+	}
 }

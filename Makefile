@@ -1,6 +1,6 @@
 NAME		:=	bathroom_wall
 SAVE_DIR	:=	tmp
-ITER_NUM	:=	1000
+ITER_NUM	:=	9000
 
 
 # Check the operating system

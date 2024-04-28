@@ -46,6 +46,7 @@ namespace FORWARD
 		const dim3 grid,
 		uint32_t* tiles_touched,
 		float* cov3Ds_final,
+		float* conic33s,
 		bool prefiltered);
 
 	// Main rasterization method.

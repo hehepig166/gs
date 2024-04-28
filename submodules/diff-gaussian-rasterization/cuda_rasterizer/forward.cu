@@ -243,6 +243,7 @@ __global__ void preprocessCUDA(int P, int D, int M,
 	const dim3 grid,
 	uint32_t* tiles_touched,
 	float* cov3Ds_final,		// 2024-04-05 zzk
+	float* conic33s,		// 2024-04-28 zzk
 	bool prefiltered)
 {
 	auto idx = cg::this_grid().thread_rank();
@@ -324,6 +325,9 @@ __global__ void preprocessCUDA(int P, int D, int M,
 	// Inverse 2D covariance and opacity neatly pack into one float4
 	conic_opacity[idx] = { conic.x, conic.y, conic.z, opacities[idx] };
 	tiles_touched[idx] = (rect_max.y - rect_min.y) * (rect_max.x - rect_min.x);
+
+	// 2024-04-28
+	conic33s[idx] = cov3D_final[5];
 }
 
 // Main rasterization method. Collaboratively works on one tile per
@@ -576,6 +580,7 @@ void FORWARD::preprocess(int P, int D, int M,
 	const dim3 grid,
 	uint32_t* tiles_touched,
 	float* cov3Ds_final,
+	float* conic33s,
 	bool prefiltered)
 {
 	preprocessCUDA<NUM_CHANNELS> << <(P + 255) / 256, 256 >> > (
@@ -604,6 +609,7 @@ void FORWARD::preprocess(int P, int D, int M,
 		grid,
 		tiles_touched,
 		cov3Ds_final,
+		conic33s,
 		prefiltered
 		);
 }

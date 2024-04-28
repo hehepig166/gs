@@ -82,7 +82,8 @@ namespace CudaRasterizer
 			float* dL_dscale,
 			float* dL_drot,
 			bool debug,
-			int grad_flag);
+			int grad_flag,
+			float* dL_dconic33);
 	};
 };
 

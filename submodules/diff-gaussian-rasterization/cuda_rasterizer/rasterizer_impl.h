@@ -43,6 +43,9 @@ namespace CudaRasterizer
 		// 2024-04-05 zzk
 		float* cov3Ds_final;
 
+		// 2024-04-28 zzk
+		float* conic33;
+
 		static GeometryState fromChunk(char*& chunk, size_t P);
 	};
 
