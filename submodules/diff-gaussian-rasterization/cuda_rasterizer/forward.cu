@@ -457,7 +457,7 @@ renderCUDA(
 			const float vb = 2 * invCov[2] * pixf.x + 2 * invCov[4] * pixf.y;
 			const float vc = invCov[0] * pixf.x * pixf.x + 2 * invCov[1] * pixf.x * pixf.y + invCov[3] * pixf.y * pixf.y;
 			float mu 	= - vb / (2*va + 0.01);
-			float sigma = sqrt(1 / (2*va + 0.01));
+			float sigma = sqrt(1 / (va + 0.01));
 			float topv  = exp(vb * vb / (4 * va + 0.01) - vc);
 			float thickness 	= sigma;
 			float contrivalue 	= thickness;

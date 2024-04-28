@@ -1,6 +1,6 @@
 NAME		:=	bathroom_wall
 SAVE_DIR	:=	tmp
-ITER_NUM	:=	30000
+ITER_NUM	:=	1000
 
 
 # Check the operating system
@@ -25,3 +25,6 @@ render:
 
 view:
 	$(VIEW_CMD)
+
+compile:
+	cd ./submodules/diff-gaussian-rasterization/ &  python setup.py install
