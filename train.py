@@ -84,7 +84,7 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
         # choose loss mode
         grad_flag = 0
         lambda_thickness = 0
-        if (iteration % 1500 > 1200):
+        if (iteration % 3000 > 1000):
             grad_flag = 1
             lambda_thickness = opt.lambda_thickness
 
@@ -94,7 +94,7 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
         image, viewspace_point_tensor, visibility_filter, radii = render_pkg["render"], render_pkg["viewspace_points"], render_pkg["visibility_filter"], render_pkg["radii"]
 
         thickness = render_pkg["tmpinfo"][1, :, :]
-        Lthickness = torch.mean(thickness)
+        Lthickness = torch.mean(torch.abs(thickness))
 
         # Loss
         gt_image = viewpoint_cam.original_image.cuda()

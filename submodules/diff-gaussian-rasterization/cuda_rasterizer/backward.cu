@@ -926,7 +926,7 @@ void BACKWARD::preprocess(
 	// Somewhat long, thus it is its own kernel rather than being part of 
 	// "preprocess". When done, loss gradient w.r.t. 3D means has been
 	// modified and gradient w.r.t. 3D covariance matrix has been computed.	
-	if (true || grad_flag == 0) {	// 2024-04-28 zzk
+	if (grad_flag == 0) {	// 2024-04-28 zzk
 		computeCov2DCUDA << <(P + 255) / 256, 256 >> > (
 			P,
 			means3D,
