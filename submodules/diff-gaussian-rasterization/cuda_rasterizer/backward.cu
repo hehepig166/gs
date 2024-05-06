@@ -601,7 +601,7 @@ __global__ void computeCov2DCUDA_2(int P,
 	// float dL_dconic33 = dL_dconic33s[idx];			// failed
 	float dL_dconic33 = dL_dconics[4 * idx + 2];		// failed
 	// float dL_dconic33 = 1;
-	if (idx %10 == 0) printf("%f\n", dL_dconic33);
+	// if (idx %10 == 0) printf("%f\n", dL_dconic33);
 
 	
 	const float limx = 1.3f * tan_fovx;
@@ -655,44 +655,44 @@ __global__ void computeCov2DCUDA_2(int P,
 		// given gradients of loss w.r.t. conic matrix (inverse covariance matrix).
 		// e.g., dL / da = dL / d_conic_a * d_conic_a / d_a
 		dL_da = denom2inv * (
-			- (e*e - d*f)*(e*e - d*f) * dL_dconic.x
-			+ 2* (c*e - b*f) * (e*e - d*f) * dL_dconic.y
-			- (c*e - b*f)*(c*e - b*f) * dL_dconic.z
+			//- (e*e - d*f)*(e*e - d*f) * dL_dconic.x
+			//+ 2* (c*e - b*f) * (e*e - d*f) * dL_dconic.y
+			//- (c*e - b*f)*(c*e - b*f) * dL_dconic.z
 			- (c*d - b*e)*(c*d - b*e) * dL_dconic33
 		);
 
 		dL_db = denom2inv * (
-			  2 * (c*e - b*f) * (e*e - d*f) * dL_dconic.x
-			+ 2 * (2*b*c*e*f + c*c*(-2*e*e+d*f) - f*(-a*e*e+b*b*f+a*d*f)) * dL_dconic.y
-			+ 2 * (c*c - a*f) * (c*e - b*f) * dL_dconic.z
+			//  2 * (c*e - b*f) * (e*e - d*f) * dL_dconic.x
+			//+ 2 * (2*b*c*e*f + c*c*(-2*e*e+d*f) - f*(-a*e*e+b*b*f+a*d*f)) * dL_dconic.y
+			//+ 2 * (c*c - a*f) * (c*e - b*f) * dL_dconic.z
 			- 2 * (b*c - a*e) * (-c*d + b*e) * dL_dconic33
 		);
 
 		dL_dc = denom2inv * (
-			  2 * (c*d - b*e) * (-e*e + d*f) * dL_dconic.x
-			+ 2 * (c*c*d*e - a*e*e*e - 2*b*c*d*f + (b*b + a*d)*e*f) * dL_dconic.y
-			+ 2 * (b*c - a*e) * (-c*e + b*f) * dL_dconic.z
+			//  2 * (c*d - b*e) * (-e*e + d*f) * dL_dconic.x
+			//+ 2 * (c*c*d*e - a*e*e*e - 2*b*c*d*f + (b*b + a*d)*e*f) * dL_dconic.y
+			//+ 2 * (b*c - a*e) * (-c*e + b*f) * dL_dconic.z
 			+ 2 * (b*b - a*d) * (-c*d + b*e) * dL_dconic33
 		);
 
 		dL_dd = denom2inv * (
-			- (c*e - b*f) * (c*e - b*f) * dL_dconic.x
-			+ 2 * (c*c - a*f) * (c*e - b*f) * dL_dconic.y
-			- (c*c - a*f)*(c*c - a*f) * dL_dconic.z
+			//- (c*e - b*f) * (c*e - b*f) * dL_dconic.x
+			//+ 2 * (c*c - a*f) * (c*e - b*f) * dL_dconic.y
+			//- (c*c - a*f)*(c*c - a*f) * dL_dconic.z
 			- (b*c - a*e) * (b*c - a*e) * dL_dconic33
 		);
 
 		dL_de = denom2inv * (
-			  2 * (c*d - b*e) * (c*e - b*f) * dL_dconic.x
-			+ 2 * (-c*c*c*d + b*b*c*f - 2*a*b*e*f + a*c*(e*e + d*f)) * dL_dconic.y
-			+ 2 * (b*c - a*e) * (c*c - a*f) * dL_dconic.z
+			//  2 * (c*d - b*e) * (c*e - b*f) * dL_dconic.x
+			//+ 2 * (-c*c*c*d + b*b*c*f - 2*a*b*e*f + a*c*(e*e + d*f)) * dL_dconic.y
+			//+ 2 * (b*c - a*e) * (c*c - a*f) * dL_dconic.z
 			+ 2 * (b*b - a*d) * (b*c - a*e) * dL_dconic33
 		);
 
 		dL_df = denom2inv * (
-			- (c*d - b*e) * (c*d - b*e) * dL_dconic.x
-			- 2 * (b*c - a*e) * (-c*d + b*e) * dL_dconic.y
-			- (b*c - a*e) * (b*c - a*e) * dL_dconic.z
+			//- (c*d - b*e) * (c*d - b*e) * dL_dconic.x
+			//- 2 * (b*c - a*e) * (-c*d + b*e) * dL_dconic.y
+			//- (b*c - a*e) * (b*c - a*e) * dL_dconic.z
 			- (b*b - a*d) * (b*b - a*d) * dL_dconic33
 		);
 
@@ -893,14 +893,49 @@ renderCUDA_2(
 			}
 
 			// Update gradients w.r.t. 2D covariance (2x2 matrix, symmetric)
-			atomicAdd(&dL_dconic2D[global_id].x, -0.5f * gdx * d.x * dL_dG);
-			atomicAdd(&dL_dconic2D[global_id].y, -0.5f * gdx * d.y * dL_dG);
-			atomicAdd(&dL_dconic2D[global_id].w, -0.5f * gdy * d.y * dL_dG);
+			//atomicAdd(&dL_dconic2D[global_id].x, -0.5f * gdx * d.x * dL_dG);
+			//atomicAdd(&dL_dconic2D[global_id].y, -0.5f * gdx * d.y * dL_dG);
+			//atomicAdd(&dL_dconic2D[global_id].w, -0.5f * gdy * d.y * dL_dG);
 
 			// Update gradients w.r.t. opacity of the Gaussian
 			// atomicAdd(&(dL_dopacity[global_id]), G * dL_dalpha);
 		}
 	}
+}
+
+
+
+// Backward pass of the preprocessing steps, except
+// for the covariance computation and inversion
+// (those are handled by a previous kernel call)
+template<int C>
+__global__ void preprocessCUDA_2(
+	int P, int D, int M,
+	const float3* means,
+	const int* radii,
+	const float* shs,
+	const bool* clamped,
+	const glm::vec3* scales,
+	const glm::vec4* rotations,
+	const float scale_modifier,
+	const float* proj,
+	const glm::vec3* campos,
+	const float3* dL_dmean2D,
+	glm::vec3* dL_dmeans,
+	float* dL_dcolor,
+	float* dL_dcov3D,
+	float* dL_dsh,
+	glm::vec3* dL_dscale,
+	glm::vec4* dL_drot)
+{
+	auto idx = cg::this_grid().thread_rank();
+	if (idx >= P || !(radii[idx] > 0))
+		return;
+
+
+	// Compute gradient updates due to computing covariance from scale/rotation
+	if (scales)
+		computeCov3D(idx, scales[idx], scale_modifier, rotations[idx], dL_dcov3D, dL_dscale, dL_drot);
 }
 
 
@@ -954,6 +989,28 @@ void BACKWARD::preprocess(
 			(float3*)dL_dmean3D,
 			dL_dcov3D
 			);
+		
+		// Propagate gradients for remaining steps: finish 3D mean gradients,
+		// propagate color gradients to SH (if desireD), propagate 3D covariance
+		// matrix gradients to scale and rotation.
+		preprocessCUDA<NUM_CHANNELS> << < (P + 255) / 256, 256 >> > (
+			P, D, M,
+			(float3*)means3D,
+			radii,
+			(grad_flag == 0 ? shs : NULL),
+			clamped,
+			(glm::vec3*)scales,
+			(glm::vec4*)rotations,
+			scale_modifier,
+			projmatrix,
+			campos,
+			(float3*)dL_dmean2D,
+			(glm::vec3*)dL_dmean3D,
+			dL_dcolor,
+			dL_dcov3D,
+			dL_dsh,
+			dL_dscale,
+			dL_drot);
 	}
 	else {
 		computeCov2DCUDA_2 << <(P + 255) / 256, 256 >> > (
@@ -971,29 +1028,26 @@ void BACKWARD::preprocess(
 			(float3*)dL_dmean3D,
 			dL_dcov3D
 			);
+		
+		preprocessCUDA_2<NUM_CHANNELS> << < (P + 255) / 256, 256 >> > (
+			P, D, M,
+			(float3*)means3D,
+			radii,
+			(grad_flag == 0 ? shs : NULL),
+			clamped,
+			(glm::vec3*)scales,
+			(glm::vec4*)rotations,
+			scale_modifier,
+			projmatrix,
+			campos,
+			(float3*)dL_dmean2D,
+			(glm::vec3*)dL_dmean3D,
+			dL_dcolor,
+			dL_dcov3D,
+			dL_dsh,
+			dL_dscale,
+			dL_drot);
 	}
-
-	// Propagate gradients for remaining steps: finish 3D mean gradients,
-	// propagate color gradients to SH (if desireD), propagate 3D covariance
-	// matrix gradients to scale and rotation.
-	preprocessCUDA<NUM_CHANNELS> << < (P + 255) / 256, 256 >> > (
-		P, D, M,
-		(float3*)means3D,
-		radii,
-		(grad_flag == 0 ? shs : NULL),
-		clamped,
-		(glm::vec3*)scales,
-		(glm::vec4*)rotations,
-		scale_modifier,
-		projmatrix,
-		campos,
-		(float3*)dL_dmean2D,
-		(glm::vec3*)dL_dmean3D,
-		dL_dcolor,
-		dL_dcov3D,
-		dL_dsh,
-		dL_dscale,
-		dL_drot);
 }
 
 void BACKWARD::render(
