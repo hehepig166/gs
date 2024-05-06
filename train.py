@@ -84,7 +84,8 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
         # choose loss mode
         grad_flag = 0
         lambda_thickness = 0
-        if (1450 <= iteration % 1500 < 1500):
+        #if (1450 <= iteration % 1500 < 1500):
+        if True:
             grad_flag = 1
             lambda_thickness = opt.lambda_thickness
 
@@ -99,14 +100,11 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
         # Loss
         gt_image = viewpoint_cam.original_image.cuda()
         Ll1 = l1_loss(image, gt_image)
-        if grad_flag == 0:
-            loss = (
-                (1.0 - opt.lambda_dssim - lambda_thickness)* Ll1
-                + opt.lambda_dssim * (1.0 - ssim(image, gt_image))
-                + lambda_thickness * (Lthickness)
-            )
-        else:
-            loss = Lthickness
+        loss = (
+            (1.0 - opt.lambda_dssim - lambda_thickness)* Ll1
+            + opt.lambda_dssim * (1.0 - ssim(image, gt_image))
+            + lambda_thickness * (Lthickness)
+        )
         loss.backward()
 
         iter_end.record()

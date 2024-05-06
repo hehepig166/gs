@@ -28,5 +28,8 @@ render:
 view:
 	$(VIEW_CMD)
 
+remote_view:
+	../viewers/bin/SIBR_remoteGaussian_app.exe
+	
 compile:
 	$(COMPILE_CMD)
