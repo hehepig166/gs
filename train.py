@@ -95,7 +95,7 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
         image, viewspace_point_tensor, visibility_filter, radii = render_pkg["render"], render_pkg["viewspace_points"], render_pkg["visibility_filter"], render_pkg["radii"]
 
         thickness = render_pkg["tmpinfo"][1, :, :]
-        Lthickness = torch.mean(torch.abs(thickness))
+        Lthickness = torch.mean(torch.abs(thickness - 0.7))
 
         # Loss
         gt_image = viewpoint_cam.original_image.cuda()
@@ -224,6 +224,7 @@ if __name__ == "__main__":
     args = parser.parse_args(sys.argv[1:])
     args.save_iterations.append(args.iterations)
     
+    print("pid: ", os.getpid())
     print("Optimizing " + args.model_path)
 
     # Initialize system state (RNG)
