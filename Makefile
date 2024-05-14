@@ -1,5 +1,5 @@
-NAME		:=	malevento#bathroom_wall
-SAVE_DIR	:=	30000#tmp
+NAME		:=	cookie_dense#sparse#bathroom_wall
+SAVE_DIR	:=	3000#tmp
 ITER_NUM	:=	3000
 
 
@@ -24,6 +24,9 @@ train:
 
 render:
 	$(RENDER_CMD)
+
+interactive_view:
+	python view.py -m ..\data\$(NAME)_res\$(SAVE_DIR)
 
 view:
 	$(VIEW_CMD)

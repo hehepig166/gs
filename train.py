@@ -85,7 +85,7 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
         grad_flag = 0
         lambda_thickness = 0
         #if (1450 <= iteration % 1500 < 1500):
-        if True:
+        if False:
             grad_flag = 1
             lambda_thickness = opt.lambda_thickness
 

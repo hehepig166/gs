@@ -103,7 +103,7 @@ def render_set(model_path, name, iteration, views, gaussians, pipeline, backgrou
                 torchvision.utils.save_image(gt, os.path.join(gts_path, '{0:05d}'.format(idx) + ".png"))
         torchvision.utils.save_image(rendering, os.path.join(render_path, '{0:05d}'.format(idx) + ".png"))
         torchvision.utils.save_image(filtered_rendering, os.path.join(filtered_path, '{0:05d}'.format(idx) + ".png"))
-        #torchvision.utils.save_image(depth, os.path.join(depth_path, '{0:05d}'.format(idx) + ".png"))
+        torchvision.utils.save_image(depth, os.path.join(depth_path, '{0:05d}'.format(idx) + ".png"))
         #torchvision.utils.save_image(sum_alpha, os.path.join(sum_alpha_path, '{0:05d}'.format(idx) + ".png"))
         #torchvision.utils.save_image(cnt_gs, os.path.join(cnt_gs_path, '{0:05d}'.format(idx) + ".png"))
         #torchvision.utils.save_image(myeval, os.path.join(myeval_path, '{0:05d}'.format(idx) + ".png"))
