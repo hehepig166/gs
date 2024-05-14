@@ -439,6 +439,7 @@ renderCUDA(
 			}
 
 			// Eq. (3) from 3D Gaussian splatting paper.
+			// if (sqrt(1 / ((invCovs + collected_id[j] * 6)[5] + 0.01)) <= 0.1) // 2024-05-08 zzk
 			for (int ch = 0; ch < CHANNELS; ch++)
 				C[ch] += features[collected_id[j] * CHANNELS + ch] * alpha * T;
 

@@ -33,6 +33,8 @@ def render_set(model_path, name, iteration, views, gaussians, pipeline, backgrou
     path1 = os.path.join(model_path, name, "ours_{}".format(iteration), "path1")    # mean of alpha
     path2 = os.path.join(model_path, name, "ours_{}".format(iteration), "path2")    # var of alpha
 
+    filtered_path = os.path.join(model_path, name, "ours_{}".format(iteration), "filtered")
+
 
     makedirs(render_path, exist_ok=True)
     makedirs(gts_path, exist_ok=True)
@@ -40,6 +42,7 @@ def render_set(model_path, name, iteration, views, gaussians, pipeline, backgrou
     #makedirs(sum_alpha_path, exist_ok=True)
     #makedirs(cnt_gs_path, exist_ok=True)
     #makedirs(myeval_path, exist_ok=True)
+    makedirs(filtered_path, exist_ok=True)
 
     makedirs(path1, exist_ok=True)
     makedirs(path2, exist_ok=True)
@@ -56,6 +59,11 @@ def render_set(model_path, name, iteration, views, gaussians, pipeline, backgrou
 
         v1 = tmpinfo[1, :, :].unsqueeze(0).repeat(3, 1, 1)
         v2 = tmpinfo[2, :, :].unsqueeze(0).repeat(3, 1, 1)
+        
+        print('min: ', torch.min(v1).item(), ';  max: ', torch.max(v1).item())
+
+        filtered_rendering = rendering.clone()
+        filtered_rendering[v1 > 1] = 0
         
         
         if mode == "cut":
@@ -94,6 +102,7 @@ def render_set(model_path, name, iteration, views, gaussians, pipeline, backgrou
                 gt = view.original_image[0:3, :, :]
                 torchvision.utils.save_image(gt, os.path.join(gts_path, '{0:05d}'.format(idx) + ".png"))
         torchvision.utils.save_image(rendering, os.path.join(render_path, '{0:05d}'.format(idx) + ".png"))
+        torchvision.utils.save_image(filtered_rendering, os.path.join(filtered_path, '{0:05d}'.format(idx) + ".png"))
         #torchvision.utils.save_image(depth, os.path.join(depth_path, '{0:05d}'.format(idx) + ".png"))
         #torchvision.utils.save_image(sum_alpha, os.path.join(sum_alpha_path, '{0:05d}'.format(idx) + ".png"))
         #torchvision.utils.save_image(cnt_gs, os.path.join(cnt_gs_path, '{0:05d}'.format(idx) + ".png"))

@@ -1,5 +1,5 @@
-NAME		:=	bathroom_wall
-SAVE_DIR	:=	tmp
+NAME		:=	malevento#bathroom_wall
+SAVE_DIR	:=	30000#tmp
 ITER_NUM	:=	3000
 
 
