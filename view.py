@@ -70,7 +70,7 @@ def myrender(dataset : ModelParams, iteration : int, pipeline : PipelineParams):
         scene = Scene(dataset, gaussians, load_iteration=iteration, shuffle=False)
 
         view = copy.deepcopy(scene.getTrainCameras()[0])
-        view.trans = np.dot(view.T, view.R)
+        view.trans = np.dot(view.R, view.T)
         view.T = np.array([0.0, 0.0, 0.0])
         
         use_filter = False
@@ -78,7 +78,7 @@ def myrender(dataset : ModelParams, iteration : int, pipeline : PipelineParams):
 
 
         while True:
-            time.sleep(1.0/60)
+            #time.sleep(1.0/60)
             delta_T = np.array([0.0, 0.0, 0.0])
             delta_R = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
 
@@ -87,7 +87,7 @@ def myrender(dataset : ModelParams, iteration : int, pipeline : PipelineParams):
             ty = np.array([0.0, dis, 0.0])
             tz = np.array([0.0, 0.0, dis])
 
-            angle = np.radians(5)
+            angle = np.radians(1)
             rx = np.array([[1, 0, 0],[0, np.cos(angle), -np.sin(angle)],[0, np.sin(angle), np.cos(angle)]])
             ry = np.array([[np.cos(angle), 0, np.sin(angle)],[0, 1, 0],[-np.sin(angle), 0, np.cos(angle)]])
             rz = np.array([[np.cos(angle), -np.sin(angle), 0],[np.sin(angle), np.cos(angle), 0],[0, 0, 1]])

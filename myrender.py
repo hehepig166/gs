@@ -21,6 +21,7 @@ from argparse import ArgumentParser
 from arguments import ModelParams, PipelineParams, get_combined_args
 from gaussian_renderer import GaussianModel
 
+import matplotlib.pyplot as plt
 
 def render_set(model_path, name, iteration, views, gaussians, pipeline, background, depth_min, depth_max, mode, skip_groundtruth):
     render_path = os.path.join(model_path, name, "ours_{}".format(iteration), "renders")
@@ -57,6 +58,21 @@ def render_set(model_path, name, iteration, views, gaussians, pipeline, backgrou
         #cnt_gs = tmpinfo[2, :, :].unsqueeze(0).repeat(3, 1, 1)
         #myeval = tmpinfo[1, :, :].unsqueeze(0).repeat(3, 1, 1)
 
+        if False:
+            # 做直方图
+            tensor_slice = tmpinfo[2, :, :].cpu()
+            tensor_slice = tensor_slice.flatten()
+            plt.figure(figsize=(7, 7))
+            plt.hist(tensor_slice, bins=50, alpha=0.75)
+            # 添加标题和标签
+            plt.xlabel('Value')
+            plt.ylabel('Frequency')
+            plt.title('iter '+str(iteration))
+            # 显示图形
+            plt.show()
+            exit()
+        
+
         v1 = tmpinfo[1, :, :].unsqueeze(0).repeat(3, 1, 1)
         v2 = tmpinfo[2, :, :].unsqueeze(0).repeat(3, 1, 1)
         
@@ -80,7 +96,7 @@ def render_set(model_path, name, iteration, views, gaussians, pipeline, backgrou
         #print(torch.max(v1), "================")
         #exit()
         #v1 = torch.div(v1, 3)
-        #v2 = torch.div(v1, torch.max(v2))
+        #v2 = torch.div(v2, torch.max(v2))
         #v2 = torch.div(v2, 0.3)
         #exit()
 
@@ -102,12 +118,12 @@ def render_set(model_path, name, iteration, views, gaussians, pipeline, backgrou
                 gt = view.original_image[0:3, :, :]
                 torchvision.utils.save_image(gt, os.path.join(gts_path, '{0:05d}'.format(idx) + ".png"))
         torchvision.utils.save_image(rendering, os.path.join(render_path, '{0:05d}'.format(idx) + ".png"))
-        torchvision.utils.save_image(filtered_rendering, os.path.join(filtered_path, '{0:05d}'.format(idx) + ".png"))
-        torchvision.utils.save_image(depth, os.path.join(depth_path, '{0:05d}'.format(idx) + ".png"))
+        #torchvision.utils.save_image(filtered_rendering, os.path.join(filtered_path, '{0:05d}'.format(idx) + ".png"))
+        #torchvision.utils.save_image(depth, os.path.join(depth_path, '{0:05d}'.format(idx) + ".png"))
         #torchvision.utils.save_image(sum_alpha, os.path.join(sum_alpha_path, '{0:05d}'.format(idx) + ".png"))
         #torchvision.utils.save_image(cnt_gs, os.path.join(cnt_gs_path, '{0:05d}'.format(idx) + ".png"))
         #torchvision.utils.save_image(myeval, os.path.join(myeval_path, '{0:05d}'.format(idx) + ".png"))
-        torchvision.utils.save_image(v1, os.path.join(path1, '{0:05d}'.format(idx) + ".png"))
+        #torchvision.utils.save_image(v1, os.path.join(path1, '{0:05d}'.format(idx) + ".png"))
         #torchvision.utils.save_image(v2, os.path.join(path2, '{0:05d}'.format(idx) + ".png"))
 
 def render_sets(dataset : ModelParams, iteration : int, pipeline : PipelineParams, skip_train : bool, skip_test : bool, depth_min : float, depth_max : float, mode : str, skip_groundtruth : bool):

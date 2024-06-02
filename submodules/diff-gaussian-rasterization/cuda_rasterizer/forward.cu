@@ -382,9 +382,11 @@ renderCUDA(
 	float C[CHANNELS] = { 0 };
 	float ret_depth = 0;
 	float sum_alpha = 0;
+	float sum_depth = 0;
 	int cnt_gs = 0;
 	float sum_contrivalue = 0;
 	float alpha_data[1000];
+	float depth_data[1000];
 
 	auto idx = cg::this_grid().thread_rank();
 
@@ -452,6 +454,10 @@ renderCUDA(
 			// save alpha --20240410
 			alpha_data[cnt_gs] = alpha;
 
+			// save depth --20240525
+			depth_data[cnt_gs] = collected_depth[j];
+			sum_depth += collected_depth[j];
+
 			// calculate cnt_gs --20240401
 			cnt_gs += 1;
 
@@ -496,6 +502,7 @@ renderCUDA(
 		//out_depth_tmpinfo[1 * H * W + pix_id] = sum_alpha / max(1, cnt_gs);
 
 		// variance of alpha
+		if (false) {
 		const float mean = sum_alpha / max(1, cnt_gs);
 		float var = 0;
 		if (cnt_gs > 1) {
@@ -505,7 +512,29 @@ renderCUDA(
 			var /= (cnt_gs - 1);
 		}
 		out_depth_tmpinfo[2 * H * W + pix_id] = var;
+		}
 
+
+		// variance of depth
+		if (false) {
+		const float mean = sum_depth / max(1, cnt_gs);
+		float var = 0;
+		if (cnt_gs > 1) {
+			for (int i=0; i<cnt_gs; i++) {
+				var += (depth_data[i] - mean) * (depth_data[i] - mean);
+			}
+			var /= (cnt_gs - 1);
+		}
+		out_depth_tmpinfo[2 * H * W + pix_id] = var;
+		}
+
+		// difference of depth
+		float mnd = 1000000, mxd = -1;
+		for (int i=0; i<cnt_gs; i++) {
+			mnd = min(mnd, depth_data[i]);
+			mxd = max(mxd, depth_data[i]);
+		}
+		out_depth_tmpinfo[2 * H * W + pix_id] = max(0.0f, mxd-mnd);
 
 		// final_density
 		// out_depth_tmpinfo[2 * H * W + pix_id] = 1.0 - T;

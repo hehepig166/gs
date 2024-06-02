@@ -1,6 +1,6 @@
-NAME		:=	cookie_dense#sparse#bathroom_wall
-SAVE_DIR	:=	3000#tmp
-ITER_NUM	:=	3000
+NAME		:=	bathroom_sparse#cookie_dense#sparse#bathroom_wall
+SAVE_DIR	:=	500_with_thickness#tmp
+ITER_NUM	:=	500
 
 
 # Check the operating system

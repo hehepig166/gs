@@ -728,6 +728,8 @@ __global__ void computeCov2DCUDA_2(int P,
 
 		for (int i=0; i<6; i++)
 			dL_dcov[6 * idx + i] *= LAMBDA_THICKNESS;
+
+		return;
 	}
 
 
