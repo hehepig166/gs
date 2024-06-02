@@ -17,8 +17,8 @@ data = {
 }
 
 plt.figure(figsize=(10, 5))
-plt.plot(data['iter'], data['thickness2'], marker='o', linestyle='-', color='b')
-plt.title('Thickness Over Iterations')
+plt.plot(data['iter'], data['thickness'], marker='o', linestyle='-', color='b')
+plt.title('Thickness Over Iterations(our loss)')
 plt.xlabel('Iteration')
 plt.ylabel('Thickness')
 plt.grid(True)
