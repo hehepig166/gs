@@ -197,6 +197,7 @@ void debug() {
 int main()
 {
     
+    
     init();
     puts("ok");
     fflush(stdout);
