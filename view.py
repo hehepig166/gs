@@ -59,6 +59,7 @@ def myrender(dataset : ModelParams, iteration : int, pipeline : PipelineParams):
     cv2.namedWindow("Image")
     print('g: save')
     print('1: switch filter')
+    print('2: switch rgb/thickness')
     print('+: threshold up')
     print('-: threshold down')
     with torch.no_grad():
@@ -74,6 +75,8 @@ def myrender(dataset : ModelParams, iteration : int, pipeline : PipelineParams):
         view.T = np.array([0.0, 0.0, 0.0])
         
         use_filter = False
+        render_thickness = False
+        thickness_top = 1.0
         threshold = 1.0
 
 
@@ -87,7 +90,7 @@ def myrender(dataset : ModelParams, iteration : int, pipeline : PipelineParams):
             ty = np.array([0.0, dis, 0.0])
             tz = np.array([0.0, 0.0, dis])
 
-            angle = np.radians(1)
+            angle = np.radians(3)
             rx = np.array([[1, 0, 0],[0, np.cos(angle), -np.sin(angle)],[0, np.sin(angle), np.cos(angle)]])
             ry = np.array([[np.cos(angle), 0, np.sin(angle)],[0, 1, 0],[-np.sin(angle), 0, np.cos(angle)]])
             rz = np.array([[np.cos(angle), -np.sin(angle), 0],[np.sin(angle), np.cos(angle), 0],[0, 0, 1]])
@@ -121,12 +124,27 @@ def myrender(dataset : ModelParams, iteration : int, pipeline : PipelineParams):
             if keyboard.is_pressed('1'):
                 use_filter = not use_filter
                 print('use_filter : ', use_filter)
+                time.sleep(0.5)
+            if keyboard.is_pressed('2'):
+                render_thickness = not render_thickness
+                print('render_thickness : ', render_thickness)
+                time.sleep(0.5)
             if keyboard.is_pressed('+'):
                 threshold += 0.01
                 print('threshold  : {:.2f}'.format(threshold))
             if keyboard.is_pressed('-'):
                 threshold -= 0.01
                 print('threshold  : {:.2f}'.format(threshold))
+
+            if keyboard.is_pressed('4'):
+                thickness_top *= 0.9
+                print('thickness_top : {:.2f}'.format(thickness_top))
+            if keyboard.is_pressed('6'):
+                thickness_top *= 1.1
+                print('thickness_top : {:.2f}'.format(thickness_top))
+            if keyboard.is_pressed('5'):
+                thickness_top = 1.0
+                print('thickness_top : {:.2f}'.format(thickness_top))
 
             if keyboard.is_pressed('a'):
                 delta_T -= tx
@@ -164,7 +182,12 @@ def myrender(dataset : ModelParams, iteration : int, pipeline : PipelineParams):
             idx += 1
             result = render(view, gaussians, pipeline, background)
 
-            rendering = result["render"]
+            if not render_thickness:
+                rendering = result["render"]
+            else:
+                rendering = result["tmpinfo"][1, :, :].unsqueeze(0).repeat(3, 1, 1)
+                rendering = rendering / thickness_top
+
 
             if use_filter:
                 thickness = result["tmpinfo"][1, :, :].unsqueeze(0).repeat(3, 1, 1)

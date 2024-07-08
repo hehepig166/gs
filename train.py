@@ -86,7 +86,7 @@ def training(dataset, opt, pipe, testing_iterations, saving_iterations, checkpoi
         lambda_thickness = 0
         #if (1450 <= iteration % 1500 < 1500):
         if True:
-            grad_flag = 0
+            grad_flag = 1
             lambda_thickness = opt.lambda_thickness
 
         bg = torch.rand((3), device="cuda") if opt.random_background else background
